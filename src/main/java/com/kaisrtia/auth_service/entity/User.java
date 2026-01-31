@@ -13,7 +13,9 @@ import com.kaisrtia.auth_service.Enum.Role;
 
 @Entity
 public class User {
-  private @Id @GeneratedValue long id;
+  @Id
+  @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+  private long id;
   @NotEmpty(message = "Name must not be empty")
   private String name;
   @NotEmpty(message = "Username must not be empty!")
