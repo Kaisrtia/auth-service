@@ -13,8 +13,8 @@ import lombok.RequiredArgsConstructor;
 import com.kaisrtia.auth_service.service.UserService;
 import com.kaisrtia.auth_service.DTO.Request.UserCreationRequest;
 import com.kaisrtia.auth_service.DTO.Response.UserResponse;
+import com.kaisrtia.auth_service.DTO.Response.ApiResponse;
 
-import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -25,18 +25,24 @@ public class UserController {
   private final UserService userService;
 
   @PostMapping
-  public ResponseEntity<UserResponse> createUser(
+  public ApiResponse<UserResponse> createUser(
       @RequestBody @Valid UserCreationRequest request) {
-    return ResponseEntity.ok(userService.createUser(request));
+    return new ApiResponse<UserResponse>(200,
+        "User created successfully!",
+        userService.createUser(request));
   }
 
   @GetMapping
-  public ResponseEntity<List<UserResponse>> getUsers() {
-    return ResponseEntity.ok(userService.getUsers());
+  public ApiResponse<List<UserResponse>> getUsers() {
+    return new ApiResponse<List<UserResponse>>(200,
+        "Users retrieved successfully!",
+        userService.getUsers());
   }
 
   @GetMapping("/{username}")
-  public ResponseEntity<UserResponse> getUserByUsername(@PathVariable String username) {
-    return ResponseEntity.ok(userService.getUserByUsername(username));
+  public ApiResponse<UserResponse> getUserByUsername(@PathVariable String username) {
+    return new ApiResponse<UserResponse>(200,
+        "User retrieved successfully!",
+        userService.getUserByUsername(username));
   }
 }
