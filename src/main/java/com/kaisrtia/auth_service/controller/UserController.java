@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 import com.kaisrtia.auth_service.service.UserService;
 import com.kaisrtia.auth_service.DTO.Request.UserCreationRequest;
@@ -21,8 +23,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
-  private final UserService userService;
+  UserService userService;
 
   @PostMapping
   public ApiResponse<UserResponse> createUser(

@@ -1,38 +1,52 @@
 package com.kaisrtia.auth_service.exception;
 
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import com.kaisrtia.auth_service.DTO.Response.ApiResponse;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-  // Handle custom exception
-  @ExceptionHandler(AppExceptionHandler.class)
-  public ApiResponse<Void> handleAppExceptions(AppExceptionHandler ex) {
-    return new ApiResponse<>(
-        ex.getHttpStatus().value(),
-        ex.getMessage(),
-        null);
+  // Handle custom exceptions
+  @ExceptionHandler(AppException.class)
+  public ResponseEntity<ApiResponse> handleAppException(AppException ex) {
+    ErrorCode errorCode = ex.getCode();
+
+    ApiResponse apiResponse = new ApiResponse<>();
+    apiResponse.setCode(errorCode.getCode());
+    apiResponse.setMessage(ex.getMessage());
+
+    return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
   }
 
-  @ExceptionHandler(AccessDeniedException.class)
-  public ApiResponse<Void> handleAccessDeniedException(AccessDeniedException ex) {
-    return new ApiResponse<>(
-        HttpStatus.FORBIDDEN.value(),
-        "Access denied!",
-        null);
+  // Handle validation exceptions
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ApiResponse> handleValidation(MethodArgumentNotValidException ex) {
+    String enumKey = ex.getFieldError().getDefaultMessage();
+
+    ErrorCode errorCode = ErrorCode.INVALID_KEY;
+    try {
+      errorCode = ErrorCode.valueOf(enumKey);
+    } catch (IllegalArgumentException e) {
+
+    }
+
+    ApiResponse apiResponse = new ApiResponse<>();
+    apiResponse.setCode(errorCode.getCode());
+    apiResponse.setMessage(errorCode.getMessage());
+
+    return ResponseEntity.badRequest().body(apiResponse);
   }
 
   // Catch all exceptions
   @ExceptionHandler(Exception.class)
-  public ApiResponse<Void> handleAllExceptions(Exception ex) {
-    ex.printStackTrace();
-    return new ApiResponse<>(
-        HttpStatus.INTERNAL_SERVER_ERROR.value(),
-        "Unknown error: " + ex.getMessage(),
-        null);
+  public ResponseEntity<ApiResponse> handleException(Exception ex) {
+    ApiResponse apiResponse = new ApiResponse<>();
+    apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
+    apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
+
+    return ResponseEntity.badRequest().body(apiResponse);
   }
 }
