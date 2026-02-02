@@ -81,16 +81,7 @@ public class UserService {
     return response;
   }
 
-  public UserResponse deleteUser(String username) {
-    User user = userRepository.findByUsername(username);
-    if (user == null) {
-      throw new AppException(ErrorCode.USER_NOT_EXISTED);
-    }
-    userRepository.delete(user);
-
-    UserResponse response = new UserResponse();
-    response.setUsername(user.getUsername());
-
-    return response;
+  public void deleteUser(String Id) {
+    userRepository.deleteById(Id);
   }
 }

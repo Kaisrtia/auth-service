@@ -20,8 +20,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  Integer id;
+  @GeneratedValue(strategy = GenerationType.UUID)
+  String id;
 
   @Size(min = 3, max = 100, message = "USERNAME_INVALID")
   @Column(unique = true, nullable = false)
