@@ -16,7 +16,6 @@ import lombok.experimental.FieldDefaults;
 import com.kaisrtia.auth_service.service.UserService;
 import com.kaisrtia.auth_service.DTO.Request.UserCreationRequest;
 import com.kaisrtia.auth_service.DTO.Response.UserResponse;
-import com.kaisrtia.auth_service.entity.User;
 import com.kaisrtia.auth_service.DTO.Response.ApiResponse;
 
 import jakarta.validation.Valid;
@@ -55,7 +54,7 @@ public class UserController {
   public ApiResponse<String> deleteUserByUsername(@PathVariable String Id) {
     userService.deleteUser(Id);
     return ApiResponse.<String>builder()
-      .result("User has been deleted")
-      .build();
+        .result("User has been deleted")
+        .build();
   }
 }
