@@ -19,6 +19,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import com.kaisrtia.auth_service.enums.Role;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -28,8 +30,12 @@ public class UserService {
 
   public UserResponse createUser(UserCreationRequest request) {
     User user = new User();
+    user.setName(request.getName());
     user.setUsername(request.getUsername());
     user.setPassword(passwordEncoder.encode(request.getPassword()));
+    List<String> roles = new ArrayList<String>();
+    roles.add(Role.USER.name());
+    user.setRoles(roles);
 
     try {
       userRepository.save(user);
@@ -38,7 +44,10 @@ public class UserService {
     }
 
     UserResponse response = new UserResponse();
+    response.setId(user.getId());
+    response.setName(user.getName());
     response.setUsername(user.getUsername());
+    response.setRoles(user.getRoles());
     return response;
   }
 

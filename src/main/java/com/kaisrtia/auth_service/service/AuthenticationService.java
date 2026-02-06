@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.StringJoiner;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +34,8 @@ import lombok.var;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 
+import com.kaisrtia.auth_service.entity.User;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -55,7 +58,7 @@ public class AuthenticationService {
     if (!authenticated) {
       throw new AppException(ErrorCode.UNAUTHENTICATED);
     }
-    String token = generateToken(user.getUsername());
+    String token = generateToken(user);
 
     return AuthenticationResponse.builder()
         .token(token)
@@ -79,14 +82,15 @@ public class AuthenticationService {
         .build();
   }
 
-  private String generateToken(String username) {
+  private String generateToken(User user) {
     JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
 
     JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-        .subject(username)
+        .subject(user.getUsername())
         .issuer("Hoang Trung Dep Trai S1 TG")
         .issueTime(new Date())
         .expirationTime(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)))
+        .claim("scope", buildScope(user))
         .build();
 
     Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -100,5 +104,13 @@ public class AuthenticationService {
       // log.error("Cannot create token", e);
       throw new RuntimeException(e);
     }
+  }
+
+  private String buildScope(User user) {
+    StringJoiner stringJoiner = new StringJoiner(" ");
+    if(!user.getRoles().isEmpty()) {
+      user.getRoles().forEach(token -> stringJoiner.add(token));
+    }
+    return stringJoiner.toString();
   }
 }

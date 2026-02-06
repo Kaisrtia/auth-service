@@ -2,8 +2,6 @@ package com.kaisrtia.auth_service.config;
 
 import org.springframework.beans.factory.annotation.Value;
 
-import java.security.KeyStore.SecretKeyEntry;
-
 import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.context.annotation.Bean;
@@ -33,14 +31,14 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
     httpSecurity.csrf(AbstractHttpConfigurer::disable);
-    httpSecurity
-        .authorizeHttpRequests(request -> request
-            .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINT).permitAll()
-            .anyRequest()
-            .authenticated());
+    httpSecurity.authorizeHttpRequests(request -> request
+        .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINT).permitAll()
+        .requestMatchers(HttpMethod.GET, "/users").hasAnyAuthority("SCOPE_ADMIN")
+        .anyRequest()
+        .authenticated());
     httpSecurity.oauth2ResourceServer(oauth2 -> oauth2
         .jwt(jwtConfigurer -> jwtConfigurer
-            .decoder(null)));
+            .decoder(jwtDecoder())));
     return httpSecurity.build();
   }
 

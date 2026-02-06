@@ -1,5 +1,7 @@
 package com.kaisrtia.auth_service.entity;
 
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,11 +25,15 @@ public class User {
   @GeneratedValue(strategy = GenerationType.UUID)
   String id;
 
-  @Size(min = 3, max = 100, message = "USERNAME_INVALID")
+  String name;
+
+  @Size(min = 3, max = 100, message = "INVALID_USERNAME")
   @Column(unique = true, nullable = false)
   String username;
 
   @Size(min = 6, max = 100, message = "INVALID_PASSWORD")
   @Column(nullable = false)
   String password;
+
+  List<String> roles;
 }
