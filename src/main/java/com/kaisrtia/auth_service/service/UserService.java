@@ -13,6 +13,8 @@ import com.kaisrtia.auth_service.exception.AppException;
 import com.kaisrtia.auth_service.exception.ErrorCode;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import lombok.AccessLevel;
@@ -27,6 +29,7 @@ import com.kaisrtia.auth_service.enums.Role;
 public class UserService {
   UserRepository userRepository;
   PasswordEncoder passwordEncoder;
+  final String HAS_ROLE_ADMIN = "hasAnyAuthority('SCOPE_ADMIN')";
 
   public UserResponse createUser(UserCreationRequest request) {
     User user = new User();
@@ -51,6 +54,7 @@ public class UserService {
     return response;
   }
 
+  @PostAuthorize("returnObject.username == authentication.name")
   public UserResponse getUserByUsername(String username) {
     User user = userRepository.findByUsername(username);
     if (user == null) {
@@ -61,13 +65,17 @@ public class UserService {
     return response;
   }
 
+  @PreAuthorize(HAS_ROLE_ADMIN)
   public List<UserResponse> getUsers() {
     List<User> users = userRepository.findAll();
 
     List<UserResponse> userReposonses = new ArrayList<>();
     for (User u : users) {
       UserResponse urp = new UserResponse();
+      urp.setId(u.getId());
+      urp.setName(u.getName());
       urp.setUsername(u.getUsername());
+      urp.setRoles(u.getRoles());
       userReposonses.add(urp);
     }
 
