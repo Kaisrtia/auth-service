@@ -38,7 +38,22 @@ public class GlobalExceptionHandler {
 
     ApiResponse apiResponse = new ApiResponse<>();
     apiResponse.setCode(errorCode.getCode());
-    apiResponse.setMessage(errorCode.getMessage());
+
+    // Replace placeholders in error message with actual constraint values
+    final String[] messageHolder = { errorCode.getMessage() };
+    if (ex.getFieldError() != null
+        && ex.getFieldError().unwrap(org.hibernate.validator.internal.engine.ConstraintViolationImpl.class) != null) {
+      var constraintViolation = ex.getFieldError()
+          .unwrap(org.hibernate.validator.internal.engine.ConstraintViolationImpl.class);
+      var attributes = constraintViolation.getConstraintDescriptor().getAttributes();
+
+      attributes.forEach((key, value) -> {
+        String placeholder = "{" + key + "}";
+        messageHolder[0] = messageHolder[0].replace(placeholder, String.valueOf(value));
+      });
+    }
+
+    apiResponse.setMessage(messageHolder[0]);
 
     return ResponseEntity
         .status(errorCode.getStatusCode())
