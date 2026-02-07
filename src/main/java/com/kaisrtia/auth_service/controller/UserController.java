@@ -23,8 +23,6 @@ import com.kaisrtia.auth_service.DTO.Response.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import com.kaisrtia.auth_service.enums.Role;
-
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -32,7 +30,7 @@ import com.kaisrtia.auth_service.enums.Role;
 public class UserController {
   UserService userService;
 
-  @PostMapping
+  @PostMapping("/register")
   public ApiResponse<UserResponse> createUser(
       @RequestBody @Valid UserCreationRequest request) {
     return new ApiResponse<UserResponse>(200,
@@ -42,10 +40,6 @@ public class UserController {
 
   @GetMapping
   public ApiResponse<List<UserResponse>> getUsers() {
-    // var test
-    //  = new SecurityContextHolder().getContext().getAuthentication();
-    // System.out.println(test.getName());
-    // test.getAuthorities().forEach(item -> System.out.println(item));
     return new ApiResponse<List<UserResponse>>(200,
         "Users retrieved successfully!",
         userService.getUsers());

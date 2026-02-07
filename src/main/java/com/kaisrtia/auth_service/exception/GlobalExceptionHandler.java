@@ -18,7 +18,9 @@ public class GlobalExceptionHandler {
     apiResponse.setCode(errorCode.getCode());
     apiResponse.setMessage(ex.getMessage());
 
-    return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
+    return ResponseEntity
+        .status(errorCode.getStatusCode())
+        .body(apiResponse);
   }
 
   // Handle validation exceptions
@@ -38,7 +40,9 @@ public class GlobalExceptionHandler {
     apiResponse.setCode(errorCode.getCode());
     apiResponse.setMessage(errorCode.getMessage());
 
-    return ResponseEntity.badRequest().body(apiResponse);
+    return ResponseEntity
+        .status(errorCode.getStatusCode())
+        .body(apiResponse);
   }
 
   // Catch all exceptions
@@ -48,6 +52,8 @@ public class GlobalExceptionHandler {
     apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
     apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
 
-    return ResponseEntity.badRequest().body(apiResponse);
+    return ResponseEntity
+        .status(ErrorCode.UNAUTHENTICATED.getStatusCode())
+        .body(apiResponse);
   }
 }

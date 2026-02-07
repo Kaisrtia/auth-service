@@ -23,7 +23,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
   public final String[] PUBLIC_POST_ENDPOINT = {
-      "/users",
+      "/users/**",
       "/login",
       "/introspect"
   };
