@@ -1,4 +1,4 @@
-package com.kaisrtia.auth_service.DTO.Response;
+package com.kaisrtia.auth_service.DTO.Request;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -12,8 +12,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthenticationResponse {
-  String token;
+public class RefreshRequest {
   String refreshToken;
-  boolean authenticated;
 }

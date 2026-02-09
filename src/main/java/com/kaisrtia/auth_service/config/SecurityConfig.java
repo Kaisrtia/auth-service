@@ -25,7 +25,8 @@ public class SecurityConfig {
   public final String[] PUBLIC_POST_ENDPOINT = {
       "/users/**",
       "/login",
-      "/introspect"
+      "/introspect",
+      "/auth/refresh"
   };
   @Value("${jwt.signerKey}")
   private String SIGNER_KEY;
