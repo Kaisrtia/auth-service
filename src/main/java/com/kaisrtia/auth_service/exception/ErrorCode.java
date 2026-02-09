@@ -21,7 +21,8 @@ public enum ErrorCode {
   UNAUTHENTICATED(1006, "Unauthenticated", HttpStatus.UNAUTHORIZED),
   UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
   INVALID_REFRESH_TOKEN(1008, "Invalid refresh token", HttpStatus.UNAUTHORIZED),
-  REFRESH_TOKEN_EXPIRED(1009, "Refresh token has expired", HttpStatus.UNAUTHORIZED);
+  REFRESH_TOKEN_EXPIRED(1009, "Refresh token has expired", HttpStatus.UNAUTHORIZED),
+  TOKEN_REVOKED(1010, "Token has been revoked", HttpStatus.UNAUTHORIZED);
 
   int code;
   String message;

@@ -14,9 +14,11 @@ import com.kaisrtia.auth_service.DTO.Request.AuthenticationRequest;
 import com.kaisrtia.auth_service.DTO.Request.IntrospectRequest;
 import com.kaisrtia.auth_service.DTO.Response.AuthenticationResponse;
 import com.kaisrtia.auth_service.DTO.Response.IntrospectResponse;
+import com.kaisrtia.auth_service.entity.InvalidatedToken;
 import com.kaisrtia.auth_service.entity.RefreshToken;
 import com.kaisrtia.auth_service.exception.AppException;
 import com.kaisrtia.auth_service.exception.ErrorCode;
+import com.kaisrtia.auth_service.repository.InvalidatedTokenRepository;
 import com.kaisrtia.auth_service.repository.RefreshTokenRepository;
 import com.kaisrtia.auth_service.repository.UserRepository;
 import com.nimbusds.jose.JOSEException;
@@ -45,6 +47,7 @@ public class AuthenticationService {
   UserRepository userRepository;
   PasswordEncoder passwordEncoder;
   RefreshTokenRepository refreshTokenRepository;
+  InvalidatedTokenRepository invalidatedTokenRepository;
 
   @NonFinal
   @Value("${jwt.signerKey}")
@@ -90,19 +93,33 @@ public class AuthenticationService {
 
     Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
+    boolean verified = signedJWT.verify(jwsVerifier) && expiryTime.after(new Date());
+
+    // Check if token is blacklisted
+    if (verified) {
+      String jti = signedJWT.getJWTClaimsSet().getJWTID();
+      if (jti != null && invalidatedTokenRepository.existsById(jti)) {
+        verified = false;
+      }
+    }
+
     return IntrospectResponse.builder()
-        .valid(signedJWT.verify(jwsVerifier) && expiryTime.after(new Date()))
+        .valid(verified)
         .build();
   }
 
   private String generateAccessToken(User user) {
     JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
 
+    // Generate unique JWT ID for blacklist tracking
+    String jti = UUID.randomUUID().toString();
+
     JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
         .subject(user.getUsername())
         .issuer("Hoang Trung Dep Trai S1 TG")
         .issueTime(new Date())
         .expirationTime(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
+        .jwtID(jti)
         .claim("scope", buildScope(user))
         .build();
 
@@ -166,6 +183,33 @@ public class AuthenticationService {
         .refreshToken(refreshTokenValue)
         .authenticated(true)
         .build();
+  }
+
+  public void logout(String accessToken, String refreshTokenValue) throws ParseException, JOSEException {
+    // 1. Revoke refresh token if provided
+    if (refreshTokenValue != null && !refreshTokenValue.isEmpty()) {
+      refreshTokenRepository.findByToken(refreshTokenValue).ifPresent(refreshToken -> {
+        refreshToken.setRevoked(true);
+        refreshToken.setUpdatedAt(LocalDateTime.now());
+        refreshTokenRepository.save(refreshToken);
+      });
+    }
+
+    // 2. Blacklist access token
+    if (accessToken != null && !accessToken.isEmpty()) {
+      SignedJWT signedJWT = SignedJWT.parse(accessToken);
+      String jti = signedJWT.getJWTClaimsSet().getJWTID();
+      Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+      if (jti != null) {
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+            .id(jti)
+            .expiryTime(LocalDateTime.ofInstant(expiryTime.toInstant(),
+                java.time.ZoneId.systemDefault()))
+            .build();
+        invalidatedTokenRepository.save(invalidatedToken);
+      }
+    }
   }
 
   private String buildScope(User user) {

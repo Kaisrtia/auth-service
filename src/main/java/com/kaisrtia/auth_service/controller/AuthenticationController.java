@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kaisrtia.auth_service.DTO.Request.AuthenticationRequest;
 import com.kaisrtia.auth_service.DTO.Request.IntrospectRequest;
+import com.kaisrtia.auth_service.DTO.Request.LogoutRequest;
 import com.kaisrtia.auth_service.DTO.Request.RefreshRequest;
 import com.kaisrtia.auth_service.DTO.Response.ApiResponse;
 import com.kaisrtia.auth_service.DTO.Response.AuthenticationResponse;
@@ -47,6 +48,23 @@ public class AuthenticationController {
     var result = authenticationService.refreshToken(request.getRefreshToken());
     return ApiResponse.<AuthenticationResponse>builder()
         .result(result)
+        .build();
+  }
+
+  @PostMapping("/auth/logout")
+  public ApiResponse<String> logout(
+      @org.springframework.web.bind.annotation.RequestHeader(value = "Authorization", required = false) String authHeader,
+      @RequestBody LogoutRequest request) throws Exception {
+
+    String accessToken = null;
+    if (authHeader != null && authHeader.startsWith("Bearer ")) {
+      accessToken = authHeader.substring(7);
+    }
+
+    authenticationService.logout(accessToken, request.getRefreshToken());
+
+    return ApiResponse.<String>builder()
+        .result("Logged out successfully")
         .build();
   }
 }
