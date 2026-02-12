@@ -188,7 +188,6 @@ public class AuthenticationService {
   }
 
   public void logout(String accessToken, String refreshTokenValue) throws ParseException, JOSEException {
-    // 1. Revoke refresh token if provided
     if (refreshTokenValue != null && !refreshTokenValue.isEmpty()) {
       refreshTokenRepository.findByToken(refreshTokenValue).ifPresent(refreshToken -> {
         refreshToken.setRevoked(true);
@@ -197,11 +196,14 @@ public class AuthenticationService {
       });
     }
 
-    // 2. Blacklist access token
     if (accessToken != null && !accessToken.isEmpty()) {
       SignedJWT signedJWT = SignedJWT.parse(accessToken);
       String jti = signedJWT.getJWTClaimsSet().getJWTID();
       Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+      if (expiryTime.before(new Date())) {
+        throw new AppException(ErrorCode.INVALID_ACCESS_TOKEN);
+      }
 
       if (jti != null) {
         InvalidatedToken invalidatedToken = InvalidatedToken.builder()
