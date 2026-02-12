@@ -94,7 +94,7 @@ public class UserService {
 
     UserResponse response = new UserResponse();
     response.setUsername(user.getUsername());
-
+    
     return response;
   }
 

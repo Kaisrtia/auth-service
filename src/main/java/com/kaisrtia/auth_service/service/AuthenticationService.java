@@ -69,7 +69,6 @@ public class AuthenticationService {
   public IntrospectResponse introspect(IntrospectRequest request)
       throws JOSEException, ParseException {
     var token = request.getToken();
-    boolean isValid = true;
 
     JWSVerifier jwsVerifier = new MACVerifier(SIGNER_KEY.getBytes());
 
