@@ -17,3 +17,5 @@ spring:
 
 jwt:
   signerKey: d8dac878e33105c6a2c97504dce2d74065d986772693854c2c5af655f1a969bf
+  access-token-expiration: 900000      # 15 minutes in milliseconds
+  refresh-token-expiration: 604800000  # 7 days in milliseconds

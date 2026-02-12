@@ -18,13 +18,16 @@ public class GlobalExceptionHandler {
     apiResponse.setCode(errorCode.getCode());
     apiResponse.setMessage(ex.getMessage());
 
-    return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
+    return ResponseEntity
+        .status(errorCode.getStatusCode())
+        .body(apiResponse);
   }
 
   // Handle validation exceptions
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ApiResponse> handleValidation(MethodArgumentNotValidException ex) {
     String enumKey = ex.getFieldError().getDefaultMessage();
+    System.out.println(enumKey);
 
     ErrorCode errorCode = ErrorCode.INVALID_KEY;
     try {
@@ -35,9 +38,26 @@ public class GlobalExceptionHandler {
 
     ApiResponse apiResponse = new ApiResponse<>();
     apiResponse.setCode(errorCode.getCode());
-    apiResponse.setMessage(errorCode.getMessage());
 
-    return ResponseEntity.badRequest().body(apiResponse);
+    // Replace placeholders in error message with actual constraint values
+    final String[] messageHolder = { errorCode.getMessage() };
+    if (ex.getFieldError() != null
+        && ex.getFieldError().unwrap(org.hibernate.validator.internal.engine.ConstraintViolationImpl.class) != null) {
+      var constraintViolation = ex.getFieldError()
+          .unwrap(org.hibernate.validator.internal.engine.ConstraintViolationImpl.class);
+      var attributes = constraintViolation.getConstraintDescriptor().getAttributes();
+
+      attributes.forEach((key, value) -> {
+        String placeholder = "{" + key + "}";
+        messageHolder[0] = messageHolder[0].replace(placeholder, String.valueOf(value));
+      });
+    }
+
+    apiResponse.setMessage(messageHolder[0]);
+
+    return ResponseEntity
+        .status(errorCode.getStatusCode())
+        .body(apiResponse);
   }
 
   // Catch all exceptions
@@ -47,6 +67,8 @@ public class GlobalExceptionHandler {
     apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
     apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
 
-    return ResponseEntity.badRequest().body(apiResponse);
+    return ResponseEntity
+        .status(ErrorCode.UNAUTHENTICATED.getStatusCode())
+        .body(apiResponse);
   }
 }

@@ -1,10 +1,5 @@
 package com.kaisrtia.auth_service.exception;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.experimental.FieldDefaults;
-
 public class AppException extends RuntimeException {
   private ErrorCode errorCode;
 

@@ -1,16 +1,17 @@
 package com.kaisrtia.auth_service.entity;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-
-import jakarta.validation.constraints.*;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -19,21 +20,30 @@ import lombok.experimental.FieldDefaults;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class User {
+public class RefreshToken {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   String id;
 
-  String name;
+  @Column(nullable = false, unique = true, length = 500)
+  String token;
 
-  @Size(min = 3, max = 100, message = "INVALID_USERNAME")
-  @Column(unique = true, nullable = false)
-  String username;
+  @ManyToOne
+  @JoinColumn(name = "user_id", nullable = false)
+  User user;
 
-  @Size(min = 6, max = 100, message = "INVALID_PASSWORD")
   @Column(nullable = false)
-  String password;
+  LocalDateTime expiryDate;
 
-  List<String> roles;
+  @Column(nullable = false)
+  @Builder.Default
+  boolean revoked = false;
+
+  @Column(nullable = false, updatable = false)
+  LocalDateTime createdAt;
+
+  @Column(nullable = false)
+  LocalDateTime updatedAt;
 }
