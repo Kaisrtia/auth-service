@@ -54,18 +54,21 @@ public class UserService {
     return response;
   }
 
-  @PostAuthorize("returnObject.username == authentication.name")
+  // @PostAuthorize("returnObject.username == authentication.name")
   public UserResponse getUserByUsername(String username) {
     User user = userRepository.findByUsername(username);
     if (user == null) {
       throw new AppException(ErrorCode.USER_NOT_EXISTED);
     }
     UserResponse response = new UserResponse();
+    response.setId(user.getId());
+    response.setName(user.getName());
     response.setUsername(user.getUsername());
+    response.setRoles(user.getRoles());
     return response;
   }
 
-  @PreAuthorize(HAS_ROLE_ADMIN)
+  @PostAuthorize(HAS_ROLE_ADMIN)
   public List<UserResponse> getUsers() {
     List<User> users = userRepository.findAll();
 

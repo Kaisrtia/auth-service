@@ -37,7 +37,6 @@ public class SecurityConfig {
     httpSecurity.csrf(AbstractHttpConfigurer::disable);
     httpSecurity.authorizeHttpRequests(request -> request
         .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINT).permitAll()
-        // .requestMatchers(HttpMethod.GET, "/users").hasAnyAuthority("SCOPE_ADMIN")
         .anyRequest()
         .authenticated());
     httpSecurity.oauth2ResourceServer(oauth2 -> oauth2
@@ -48,8 +47,7 @@ public class SecurityConfig {
 
   @Bean
   JwtDecoder jwtDecoder() {
-    SecretKeySpec secretKeySpec = new SecretKeySpec(
-        SIGNER_KEY.getBytes(), "HS512");
+    SecretKeySpec secretKeySpec = new SecretKeySpec(SIGNER_KEY.getBytes(), "HS512");
     return NimbusJwtDecoder
         .withSecretKey(secretKeySpec)
         .macAlgorithm(MacAlgorithm.HS512)
