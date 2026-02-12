@@ -18,9 +18,11 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
   public final String[] PUBLIC_POST_ENDPOINT = {
-      "/users",
+      "/users/**",
       "/login",
-      "/introspect"
+      "/introspect",
+      "/auth/refresh",
+      "/auth/logout"
   };
 
   @Autowired
@@ -31,7 +33,6 @@ public class SecurityConfig {
     httpSecurity.csrf(AbstractHttpConfigurer::disable);
     httpSecurity.authorizeHttpRequests(request -> request
         .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINT).permitAll()
-        // .requestMatchers(HttpMethod.GET, "/users").hasAnyAuthority("SCOPE_ADMIN")
         .anyRequest()
         .authenticated());
     httpSecurity.oauth2ResourceServer(oauth2 -> oauth2
