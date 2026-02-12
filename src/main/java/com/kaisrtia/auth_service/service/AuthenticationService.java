@@ -7,6 +7,7 @@ import java.util.StringJoiner;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +46,6 @@ import com.kaisrtia.auth_service.entity.User;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationService {
   UserRepository userRepository;
-  PasswordEncoder passwordEncoder;
   RefreshTokenRepository refreshTokenRepository;
   InvalidatedTokenRepository invalidatedTokenRepository;
 
@@ -66,6 +66,8 @@ public class AuthenticationService {
     if (user == null) {
       throw new AppException(ErrorCode.USER_NOT_EXISTED);
     }
+
+    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
     boolean authenticated = passwordEncoder.matches(request.getPassword(),
         user.getPassword());
